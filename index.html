@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WOLF LABS | Main Series: The Perfect Intro A1</title>
+    <!-- Premium Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&family=Outfit:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- WOLF LABS SUPREME ENGINE (NETWORKING EDITION) --- */
+        :root {
+            --bg-base: #0f172a; /* Deep Slate */
+            --brand-main: #8b5cf6; /* Vibrant Violet */
+            --accent: #0ea5e9; /* Cyan */
+            --accent-glow: rgba(139, 92, 246, 0.4);
+            --correct: #10b981; 
+            --incorrect: #ef4444; 
+            --text-main: #f8fafc;
+            --text-dim: #cbd5e1;
+            --glass-bg: rgba(15, 23, 42, 0.85); 
+            --glass-border: rgba(255, 255, 255, 0.1); 
+            --font-display: 'Montserrat', sans-serif;
+            --font-body: 'Outfit', sans-serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        button, input, select, textarea { font-family: var(--font-body); outline: none; }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+            display: flex; flex-direction: column;
+            position: fixed; 
+            perspective: 1000px;
+            transition: box-shadow 0.3s;
+        }
+
+        /* CORRECTION MODE EFFECT */
+        .correction-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 9998; box-shadow: inset 0 0 0 rgba(239, 68, 68, 0); transition: box-shadow 0.4s ease; }
+        body.correction-mode .correction-overlay { box-shadow: inset 0 0 150px 20px rgba(239, 68, 68, 0.6); }
+
+        /* --- IMMERSIVE BACKGROUND --- */
+        .ambient-orbs { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+        .bg-image {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://images.unsplash.com/photo-1515169067868-5387ec356754?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover; background-position: center;
+            opacity: 0.15; z-index: 1; filter: grayscale(50%) brightness(0.7);
+        }
+        .bg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(15,23,42,0.95) 100%);
+            z-index: 2;
+        }
+        .orb { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.2; z-index: 3; }
+        .orb-1 { width: 60vw; height: 60vw; background: var(--brand-main); top: -20%; left: -20%; }
+        .orb-2 { width: 50vw; height: 50vw; background: var(--accent); bottom: -10%; right: -10%; }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 30px; height: 75px;
+            background: rgba(15,23,42,0.8); backdrop-filter: blur(30px);
+            position: fixed; top: 20px; left: 2%; width: 96%; z-index: 100;
+            border: 1px solid rgba(255,255,255,0.05); border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .logo { color: #fff; font-family: var(--font-display); font-size: 1.2rem; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 10px;}
+        .logo i { color: var(--brand-main); }
+        .logo span { background: var(--brand-main); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 800; }
+        
+        .nav-controls { display: flex; gap: 10px; align-items: center;}
+        .teacher-tool {
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: #cbd5e1; width: 40px; height: 40px; border-radius: 12px; cursor: pointer;
+            font-size: 1rem; transition: 0.3s; display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .teacher-tool:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .teacher-tool.active-tool { background: var(--brand-main); color: #fff; border-color: var(--brand-main); box-shadow: 0 0 15px var(--accent-glow); }
+
+        /* --- MAIN CONTAINER --- */
+        .main-container { flex: 1; position: relative; z-index: 10; padding: 110px 5% 100px 5%; display: flex; align-items: center; justify-content: center; }
+        .slide { height: 100%; width: 100%; max-width: 1100px; display: none; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transform: translateY(20px); transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+        .slide.active { display: flex; opacity: 1; transform: translateY(0); }
+
+        .glass-panel {
+            background: var(--glass-bg); backdrop-filter: blur(40px);
+            border: 1px solid var(--glass-border); border-top: 3px solid var(--brand-main);
+            padding: 50px 60px; border-radius: 30px; width: 100%; max-height: 82vh; 
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 20px 50px rgba(255,255,255,0.02);
+            display: flex; flex-direction: column; position: relative; overflow-y: auto; scrollbar-width: none;
+        }
+        .glass-panel::-webkit-scrollbar { display: none; }
+
+        /* --- TYPOGRAPHY --- */
+        h1 { font-family: var(--font-display); font-size: 4.5rem; color: #fff; line-height: 1; margin-bottom: 20px; text-align: center; letter-spacing: -2px; }
+        h2 { font-family: var(--font-display); font-size: 2.2rem; color: var(--brand-main); margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 15px; text-transform: uppercase;}
+        p { font-size: 1.3rem; color: var(--text-dim); line-height: 1.6; text-align: center; margin-bottom: 25px;}
+
+        /* --- INTERACTIVE ELEMENTS --- */
+        .btn-start { 
+            padding: 20px 45px; border: none; border-radius: 15px; font-weight: 800; font-size: 1.2rem; text-transform: uppercase; cursor: pointer; transition: 0.3s; display: inline-flex; align-items: center; gap: 12px; background: var(--brand-main); color: #fff; box-shadow: 0 10px 30px var(--accent-glow);
+        }
+        .btn-start:hover { transform: translateY(-5px); filter: brightness(1.1); box-shadow: 0 15px 40px rgba(139, 92, 246, 0.6); }
+
+        .input-name { width: 100%; max-width: 400px; padding: 18px 30px; border-radius: 15px; border: 2px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5); color: #fff; font-size: 1.4rem; text-align: center; margin-bottom: 30px; transition: 0.3s;}
+        .input-name:focus { border-color: var(--brand-main); box-shadow: 0 0 25px var(--accent-glow); }
+
+        /* FIXED VIDEO WRAPPER */
+        .video-wrapper { position: relative; width: 100%; max-width: 850px; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.8); margin-bottom: 25px; z-index: 50; }
+        .video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: auto !important; z-index: 60; }
+        
+        .speaking-hub { margin-top: 30px; padding: 30px; background: rgba(0,0,0,0.5); border-radius: 20px; border-left: 5px solid var(--accent); text-align: left; width: 100%; display: none; animation: popIn 0.5s ease; position: relative;}
+        
+        /* CLICKABLE SPEAKING STARTERS */
+        .starter-btn { background: rgba(14, 165, 233, 0.1); border: 1px dashed var(--accent); color: var(--accent); padding: 12px 25px; border-radius: 12px; cursor: pointer; transition: 0.3s; font-family: var(--font-code); font-weight: 700; font-size: 1rem; display: inline-flex; align-items: center; gap: 10px; margin-top: 15px;}
+        .starter-btn:hover { background: var(--accent); color: #fff; }
+        .starter-content { display: none; margin-top: 15px; background: rgba(0,0,0,0.4); border-radius: 12px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); animation: popIn 0.3s forwards;}
+        .starter-content.active { display: block; }
+        .starter-phrase { font-family: var(--font-code); font-size: 1.4rem; color: #fff; font-weight: 700; display: block; margin-bottom: 10px; border-left: 3px solid var(--brand-main); padding-left: 15px;}
+
+        /* Games */
+        .ww-grid { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 20px;}
+        .ww-box { width: 160px; height: 160px; background: #1e293b; border-radius: 20px; border: 2px solid var(--glass-border); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; }
+        .ww-box:hover { border-color: var(--brand-main); transform: translateY(-10px); background: #283548; }
+        .ww-box i { font-size: 3rem; color: var(--brand-main); margin-bottom: 10px; }
+        .ww-box.opened { opacity: 0.2; pointer-events: none; }
+
+        /* INTERACTIVE GRAMMAR BUILDER */
+        .grammar-builder { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); padding: 40px; border-radius: 20px; text-align: left; width: 100%; max-width: 800px; margin-bottom: 30px;}
+        .g-sentence { font-size: 2.2rem; color: #fff; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 15px;}
+        .g-slot { background: rgba(0,0,0,0.5); border: 2px dashed var(--glass-border); padding: 10px 20px; border-radius: 12px; min-width: 150px; text-align: center; color: var(--text-dim); cursor: pointer; transition: 0.3s; font-family: var(--font-code); font-size: 1.5rem;}
+        .g-slot.active-slot { border-color: var(--brand-main); background: rgba(139, 92, 246, 0.1); box-shadow: 0 0 15px var(--accent-glow);}
+        .g-slot.filled { background: var(--correct); border-color: var(--correct); color: #000; font-weight: 800; cursor: default;}
+        .g-options { display: flex; gap: 15px; margin-top: 30px; justify-content: center; opacity: 0.5; pointer-events: none; transition: 0.3s;}
+        .g-options.active { opacity: 1; pointer-events: auto; }
+        .g-opt-btn { background: #1e293b; border: 2px solid var(--glass-border); color: #fff; padding: 15px 30px; border-radius: 12px; font-size: 1.4rem; font-weight: 800; cursor: pointer; transition: 0.2s;}
+        .g-opt-btn:hover { background: var(--brand-main); color: #fff; border-color: var(--brand-main);}
+
+        /* Syntax Builder */
+        .drop-zone { min-height: 100px; border: 2px dashed rgba(255,255,255,0.2); border-radius: 20px; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; padding: 20px; margin-bottom: 20px; width: 100%; background: rgba(0,0,0,0.2);}
+        .word-chip { padding: 12px 25px; background: #1e293b; border: 1px solid var(--glass-border); border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; color: #fff;}
+        .word-chip:hover { background: var(--brand-main); color: #fff; border-color: var(--brand-main); transform: translateY(-3px);}
+
+        /* DRAG & DROP MATCH UP */
+        .match-container { display: flex; gap: 30px; width: 100%; justify-content: center; flex-wrap: wrap; text-align: left; margin-top: 20px;}
+        .match-col { display: flex; flex-direction: column; gap: 15px; flex: 1; min-width: 250px;}
+        .drag-item { background: #1e293b; border: 1px solid var(--glass-border); color: #fff; padding: 20px; font-weight: 700; font-size: 1.3rem; text-align: center; cursor: grab; transition: 0.2s; border-radius: 15px; user-select: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
+        .drag-item:active { cursor: grabbing; transform: scale(0.95); background: var(--brand-main); color: #fff;}
+        .drag-item.matched { background: var(--correct); color: #000; pointer-events: none; padding: 15px; font-size: 1.2rem; margin:0; border-color: var(--correct); box-shadow: none; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;}
+        .def-row { display: flex; align-items: stretch; gap: 15px; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 15px; border: 1px solid var(--glass-border); transition: 0.3s; }
+        .match-dropzone { background: rgba(255,255,255,0.05); border: 2px dashed #475569; border-radius: 12px; width: 220px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: 0.2s; padding: 5px;}
+        .match-dropzone.dragover { background: rgba(139, 92, 246, 0.1); border-color: var(--brand-main); }
+        .def-text { font-size: 1.2rem; font-weight: 500; color: #f8fafc; line-height: 1.4; display: flex; align-items: center;}
+
+        /* Agree/Disagree Buttons */
+        .agree-container { display: flex; gap: 15px; width: 100%; max-width: 800px; margin: 0 auto; justify-content: center; margin-top: 20px;}
+        .agree-btn { padding: 20px 30px; font-weight: 800; font-size: 1.2rem; font-family: var(--font-display); border-radius: 16px; border: 2px solid; background: rgba(0,0,0,0.6); transition: 0.3s; flex: 1; cursor: pointer; color: #fff; text-transform: uppercase;}
+        .agree-btn.disagree { border-color: #ef4444; }
+        .agree-btn.neutral { border-color: #f59e0b; }
+        .agree-btn.agree { border-color: #10b981; }
+        .agree-btn:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .agree-btn:hover.disagree { background: #ef4444; color:#fff;}
+        .agree-btn:hover.neutral { background: #f59e0b; color:#fff;}
+        .agree-btn:hover.agree { background: #10b981; color:#000;}
+        .agree-btn.selected.disagree { background: #ef4444; color: #fff; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5); transform: scale(1.05);}
+        .agree-btn.selected.neutral { background: #f59e0b; color: #fff; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.5); transform: scale(1.05);}
+        .agree-btn.selected.agree { background: #10b981; color: #000; box-shadow: 0 10px 30px rgba(16, 185, 129, 0.5); transform: scale(1.05);}
+
+        /* Topic Cards */
+        .topic-grid { display: flex; gap: 20px; justify-content: center; perspective: 1000px; margin-top: 20px; flex-wrap: wrap;}
+        .t-card { width: 250px; height: 320px; position: relative; cursor: pointer; transform-style: preserve-3d; transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .t-card.flipped { transform: rotateY(180deg) scale(1.05); z-index: 10; pointer-events: none;}
+        .t-front, .t-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 24px; display: flex; align-items: center; justify-content: center; padding: 30px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.5);}
+        .t-front { background: #1e293b; color: var(--brand-main); font-size: 6rem; border: 2px solid var(--glass-border); transition: 0.3s;}
+        .t-front::after { content: '?'; position: absolute; font-family: var(--font-display); font-weight: 900; opacity: 0.8;}
+        .t-front:hover { filter: brightness(1.3); transform: translateY(-8px); box-shadow: 0 20px 40px var(--accent-glow); border-color: var(--brand-main);}
+        .t-back { background: linear-gradient(135deg, #8b5cf6, #0ea5e9); color: #fff; transform: rotateY(180deg); font-size: 1.5rem; font-weight: 800; border: none; flex-direction: column; gap: 15px; text-shadow: 0 2px 5px rgba(0,0,0,0.3);}
+
+        /* Quick Thinker (Name 3) */
+        .n3-circle { width: 80px; height: 80px; border-radius: 50%; border: 3px dashed rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.4); font-family: var(--font-display); font-weight: 900;}
+        .n3-circle.filled { background: var(--brand-main); border-color: var(--brand-main); border-style: solid; color: #fff; transform: scale(1.1); box-shadow: 0 0 20px var(--accent-glow); }
+
+        /* Would You Rather */
+        .wyr-container { display: flex; gap: 25px; width: 100%; margin-top: 20px;}
+        .wyr-card { flex: 1; padding: 40px; border-radius: 20px; background: rgba(255,255,255,0.03); border: 2px solid var(--glass-border); cursor: pointer; transition: 0.4s; text-align: center;}
+        .wyr-card:hover { border-color: var(--brand-main); background: rgba(139, 92, 246, 0.05); transform: scale(1.02); }
+        .wyr-card.selected { background: var(--brand-main); border-color: var(--brand-main); color: #fff; pointer-events: none;}
+        .wyr-card i { font-size: 4rem; margin-bottom: 20px; color: var(--brand-main); transition: 0.3s;}
+        .wyr-card.selected i { color: #fff; }
+
+        /* FOOTER */
+        .footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 85px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); display: flex; justify-content: space-between; align-items: center; padding: 0 5%; z-index: 150; border-top: 1px solid rgba(255,255,255,0.05); transition: 0.4s; }
+        .footer.hidden-mode { transform: translateY(100px); }
+        .nav-btn { background: transparent; border: none; color: #94a3b8; padding: 12px 25px; font-weight: 800; cursor: pointer; transition: 0.3s; font-family: var(--font-code); display: flex; align-items: center; gap: 10px; }
+        .nav-btn:hover:not(:disabled) { color: #fff; }
+        .nav-btn.next { background: #fff; color: #0f172a; border-radius: 12px; padding: 15px 40px; box-shadow: 0 5px 15px rgba(255,255,255,0.1); }
+        .nav-btn.next:hover { background: var(--brand-main); color: #fff; box-shadow: 0 5px 25px var(--accent-glow); }
+        .progress-bar { position: fixed; bottom: 85px; left: 0; height: 5px; background: var(--brand-main); transition: 0.4s; z-index: 151; box-shadow: 0 0 10px var(--brand-main);}
+        .progress-bar.hidden-mode { display: none; }
+
+        /* RIGHT SIDEBARS (Dict, Whiteboard) */
+        .sidebar-panel { position: fixed; top: 0; right: -500px; width: 480px; height: 100vh; background: #0f172a; z-index: 250; padding: 100px 50px 50px; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); border-left: 1px solid var(--glass-border); box-shadow: -30px 0 60px rgba(0,0,0,0.8); }
+        .sidebar-panel.open { right: 0; }
+        .sidebar-close { position: absolute; top: 30px; left: 30px; background: rgba(255,255,255,0.05); border: none; color: #fff; width: 50px; height: 50px; border-radius: 15px; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;}
+        .sidebar-close:hover { background: var(--incorrect); }
+
+        /* TEACHER HUD (LEFT SIDEBAR) */
+        .teacher-hud { position: fixed; top: 0; left: -500px; width: 450px; height: 100vh; background: #0f172a; z-index: 250; padding: 100px 50px 50px; transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1); border-right: 1px solid var(--glass-border); box-shadow: 30px 0 60px rgba(0,0,0,0.8); overflow-y: auto; }
+        .teacher-hud.open { left: 0; }
+        .hud-btn { width: 100%; padding: 15px; background: #1e293b; border: 1px solid var(--glass-border); color: #fff; border-radius: 12px; margin-bottom: 15px; cursor: pointer; font-family: var(--font-body); font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; transition: 0.2s;}
+        .hud-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .hud-btn.warning:hover { background: var(--incorrect); border-color: var(--incorrect); color: #fff; }
+        .hud-timer { font-family: var(--font-code); font-size: 3.5rem; color: var(--brand-main); text-align: center; margin-bottom: 20px; font-weight: 900;}
+
+        /* ALERTS & PRAISE OVERLAY */
+        .alert-overlay { position: fixed; inset: 0; pointer-events: none; display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; transition: 0.3s; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);}
+        .alert-text { font-family: var(--font-display); font-size: 6rem; text-transform: uppercase; font-weight: 900; text-shadow: 0 10px 40px rgba(0,0,0,0.8); transform: scale(0.5); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-align: center; line-height: 1;}
+        .alert-overlay.show { opacity: 1; }
+        .alert-overlay.show .alert-text { transform: scale(1); }
+        .alert-praise { color: var(--correct); filter: drop-shadow(0 0 30px var(--correct)); }
+        .alert-cue { color: var(--accent); filter: drop-shadow(0 0 30px var(--accent)); }
+        .alert-star { color: var(--brand-main); font-size: 8rem; filter: drop-shadow(0 0 50px var(--brand-main)); }
+
+        .dict-word { font-family: var(--font-display); font-size: 3.5rem; color: var(--brand-main); margin-bottom: 5px; text-transform: uppercase; }
+        .dict-phonetic { font-family: var(--font-code); color: var(--accent); font-size: 1.2rem; margin-bottom: 25px; display: block; }
+        .dict-def { font-size: 1.4rem; color: #fff; line-height: 1.6; border-left: 4px solid var(--brand-main); padding-left: 20px; }
+
+        .hl { color: var(--brand-main); font-weight: 800; border-bottom: 2px dashed var(--brand-main); cursor: help; padding: 0 4px; transition: 0.2s;}
+        .hl:hover { background: rgba(139, 92, 246, 0.15); border-bottom-style: solid; border-radius: 4px;}
+
+        @keyframes popIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
+    </style>
+</head>
+<body>
+
+    <div class="correction-overlay"></div>
+
+    <div class="ambient-orbs">
+        <div class="bg-image"></div>
+        <div class="bg-overlay"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <!-- ALERTS & PRAISE OVERLAY -->
+    <div class="alert-overlay" id="alert-screen"><div class="alert-text" id="alert-msg">GREAT JOB!</div></div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="logo"><i class="fa-solid fa-users"></i> WOLF LABS <span>THE PERFECT INTRO</span></div>
+        <div class="nav-controls">
+            <button class="teacher-tool" onclick="document.getElementById('teacher-hud').classList.toggle('open')" title="Teacher HUD"><i class="fa-solid fa-toolbox"></i></button>
+            <div style="width: 1px; height: 25px; background: rgba(255,255,255,0.1); margin: 0 5px;"></div>
+            
+            <button class="teacher-tool" onclick="window.toggleFocusMode()" title="Focus Mode"><i class="fa-solid fa-eye-slash"></i></button>
+            <button class="teacher-tool" onclick="window.toggleSidebar('whiteboard')" title="Whiteboard"><i class="fa-solid fa-pen-nib"></i></button>
+            <button class="teacher-tool" onclick="window.toggleFullscreen()" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+        </div>
+    </nav>
+
+    <!-- TEACHER HUD (LEFT SIDEBAR) -->
+    <div class="teacher-hud" id="teacher-hud">
+        <button class="sidebar-close" style="left: auto; right: 30px;" onclick="document.getElementById('teacher-hud').classList.remove('open')"><i class="fa-solid fa-xmark"></i></button>
+        <p style="font-family: var(--font-code); color: var(--brand-main); font-size: 0.8rem; margin-bottom: 20px; letter-spacing: 2px;">// TEACHER TOOL SET</p>
+        
+        <div class="hud-timer" id="hud-timer">00:60</div>
+        <button class="hud-btn" onclick="startTimer()"><i class="fa-solid fa-play"></i> Start 60s Timer</button>
+        <button class="hud-btn warning" onclick="toggleCorrectionMode()"><i class="fa-solid fa-hand-paper"></i> Correction Mode</button>
+        
+        <div style="margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 25px;">
+            <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 15px; font-weight: 700; font-family: var(--font-code);">STUDENT POINTS</p>
+            <div style="display: flex; align-items: center; justify-content: space-between; background: #000; padding: 15px 25px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                <span style="color: var(--brand-main); font-size: 2rem; font-weight: 900;" id="hud-stars">⭐ 0</span>
+                <button class="hud-btn" style="width: auto; margin: 0; padding: 10px 20px;" onclick="awardStar()">+1</button>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 25px;">
+            <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 15px; font-weight: 700; font-family: var(--font-code);">LIVE CUES</p>
+            <button class="hud-btn" style="background: rgba(14, 165, 233, 0.1); border-color: var(--accent); color: var(--accent);" onclick="showAlert('SPEAK<br>SLOWER 🐢', 'cue')"><i class="fa-solid fa-turtle"></i> Speak Slower</button>
+            <button class="hud-btn" style="background: rgba(14, 165, 233, 0.1); border-color: var(--accent); color: var(--accent);" onclick="showAlert('LOUDER<br>PLEASE 🔊', 'cue')"><i class="fa-solid fa-volume-high"></i> Speak Louder</button>
+        </div>
+
+        <div style="margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 25px;">
+            <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 15px; font-weight: 700; font-family: var(--font-code);">PRAISE GENERATOR</p>
+            <button class="hud-btn" onclick="showAlert('PERFECT<br>PRONUNCIATION!', 'praise')"><i class="fa-solid fa-comment-dots"></i> Perfect Pronunciation</button>
+            <button class="hud-btn" onclick="showAlert('AMAZING<br>VOCABULARY!', 'praise')"><i class="fa-solid fa-spell-check"></i> Amazing Vocab</button>
+            <button class="hud-btn" onclick="showAlert('AMAZING<br>ANSWER! 🏆', 'praise')"><i class="fa-solid fa-trophy"></i> Amazing Answer</button>
+        </div>
+    </div>
+
+    <!-- SMART DICT -->
+    <div class="sidebar-panel" id="dict-panel" style="overflow-y: auto;">
+        <button class="sidebar-close" onclick="window.toggleSidebar('dict-panel')"><i class="fa-solid fa-xmark"></i></button>
+        <p style="font-family: var(--font-code); color: var(--brand-main); font-size: 0.8rem; margin-bottom: 20px; letter-spacing: 2px;">// SMART DICTIONARY</p>
+        <h1 id="d-word" class="dict-word">Word</h1>
+        <span id="d-phonetic" class="dict-phonetic">/phonetic/</span>
+        <div class="dict-def" id="d-def">Definition here.</div>
+        <div style="margin-top: 30px; padding: 25px; background: rgba(255,255,255,0.03); border-radius: 15px; border: 1px solid rgba(255,255,255,0.05);">
+            <p style="font-size: 0.9rem; text-align: left; color: var(--brand-main); font-weight: 800; text-transform: uppercase;">Real Context:</p>
+            <p id="d-ex" style="text-align: left; font-style: italic; margin-top: 10px; font-size: 1.1rem; color: #cbd5e1;"></p>
+        </div>
+        
+        <div id="dict-hub-container" style="margin-top: 30px; background: rgba(0,0,0,0.6); padding: 25px; border-radius: 15px; border: 1px solid var(--accent); position: relative;">
+            <span style="position: absolute; top: -12px; left: 20px; background: var(--accent); color: #fff; padding: 4px 10px; font-weight: 800; border-radius: 5px; font-size: 0.8rem;">🎙️ LET'S TALK</span>
+            <p id="d-speak" style="color: #fff; font-size: 1.2rem; font-weight: 600; line-height: 1.5; margin: 0; text-align: left;"></p>
+        </div>
+    </div>
+
+    <!-- WHITEBOARD -->
+    <div class="sidebar-panel" id="whiteboard">
+        <button class="sidebar-close" onclick="window.toggleSidebar('whiteboard')"><i class="fa-solid fa-xmark"></i></button>
+        <h2 style="text-align: left; color: #fff; font-family: var(--font-display);">WHITEBOARD</h2>
+        <textarea style="width: 100%; height: 75%; background: #000; border: 1px solid var(--glass-border); border-radius: 15px; margin-top: 20px; padding: 25px; color: var(--brand-main); font-family: var(--font-code); font-size: 1.2rem; resize: none; box-shadow: inset 0 0 20px rgba(0,0,0,0.8);" placeholder="// Capture student speaking errors here..."></textarea>
+    </div>
+
+    <main class="main-container" id="slides-container">
+
+        <!-- 1. ADMIN -->
+        <div class="slide active">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-user-shield"></i> ADMIN PROTOCOL</h2>
+                <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid var(--brand-main); padding: 30px; border-radius: 20px; text-align: left; width: 100%; max-width: 800px;">
+                    <p style="text-align: left; margin-bottom: 12px; font-size: 1.2rem;"><strong>LEVEL:</strong> A1 (Beginner)</p>
+                    <p style="text-align: left; margin-bottom: 12px; font-size: 1.2rem;"><strong>TOPIC:</strong> Introducing Yourself</p>
+                    <p style="text-align: left; margin-bottom: 12px; font-size: 1.2rem;"><strong>CORE VOCAB:</strong> Greeting, Name, Job, Detail, Hobby, Professional.</p>
+                    <p style="text-align: left; margin-bottom: 12px; font-size: 1.2rem;"><strong>GRAMMAR FOCUS:</strong> Verb To Be (I am from... / I am a...).</p>
+                    <p style="text-align: left; font-size: 1.2rem; color: var(--brand-main); margin-bottom: 0;"><strong>LESSON FLOW:</strong> 3 Long Video Chunks ➔ Grammar Builder ➔ Interaction Boosters ➔ Final Roleplay.</p>
+                </div>
+                <div style="margin-top: 30px; background: rgba(0,0,0,0.4); padding: 25px; border-radius: 15px; border-left: 4px solid var(--brand-main); text-align: left; width: 100%; max-width: 800px;">
+                    <p style="color: var(--text-dim); font-family: var(--font-code); font-size: 1.1rem; line-height: 1.6; margin: 0;">
+                        <span style="color: var(--brand-main); font-weight: 800;">// PRO TIPS FOR TEACHERS:</span><br><br>
+                        1. Use the <strong>Toolbox icon</strong> <i class="fa-solid fa-toolbox"></i> in the top menu to open your Teacher HUD. Use <em>Live Cues</em> (Speak Slower), award <em>Student Points</em> (⭐), and activate Correction Mode.<br>
+                        2. Whenever a word has a <span style="border-bottom: 2px dashed var(--brand-main);">dashed underline</span>, click it to open the <strong>Smart Dict</strong>. You will find instant definitions and "Let's Talk" follow-up questions to expand the conversation.
+                    </p>
+                </div>
+                <button class="btn-start" style="margin-top: 30px;" onclick="window.nextSlide()">INITIALIZE LESSON</button>
+            </div>
+        </div>
+
+        <!-- 2. COVER -->
+        <div class="slide">
+            <div class="glass-panel" style="text-align: center; border: none; background: transparent; box-shadow: none;">
+                <div style="font-size: 8rem; color: var(--brand-main); filter: drop-shadow(0 0 30px var(--accent-glow)); animation: pulse 3s infinite; margin-bottom: 20px;">
+                    <i class="fa-solid fa-handshake"></i>
+                </div>
+                <h1 style="font-size: 5.5rem; letter-spacing: -1px; text-transform: uppercase; margin-bottom: 10px; text-shadow: 0 10px 30px rgba(0,0,0,0.8);">
+                    THE PERFECT<br><span style="color: var(--brand-main);">INTRO</span>
+                </h1>
+                <p style="font-size: 1.5rem; letter-spacing: 5px; color: var(--accent); font-weight: 800; margin-bottom: 40px;">A1 MASTERCLASS</p>
+                <div style="margin-bottom: 30px;">
+                    <input type="text" id="s-name" class="input-name" placeholder="Type your name..." onkeypress="if(event.key==='Enter') window.saveName()">
+                </div>
+                <button class="btn-start" style="font-size: 1.5rem; padding: 25px 60px;" onclick="window.saveName()">START MISSION <i class="fa-solid fa-arrow-right" style="margin-left: 10px;"></i></button>
+            </div>
+        </div>
+
+        <!-- 3. ICEBREAKER -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-fire"></i> ICEBREAKER</h2>
+                <p style="font-size: 1.8rem;">Hi <span class="dyn-name">Student</span>! When you meet new people, are you...</p>
+                <div class="ww-grid">
+                    <button class="btn-start" style="background: #1e293b; border: 1px solid var(--accent); color: #fff;" onclick="window.showHub('hub-ice')">SHY</button>
+                    <button class="btn-start" style="background: #1e293b; border: 1px solid var(--brand-main); color: #fff;" onclick="window.showHub('hub-ice')">CONFIDENT</button>
+                </div>
+                <div class="speaking-hub" id="hub-ice">
+                    <p><strong>TEACHER:</strong> Ask "Why?" and discuss how introducing yourself can be scary.</p>
+                    <button class="starter-btn" onclick="this.nextElementSibling.classList.toggle('active')"><i class="fa-solid fa-lightbulb"></i> Need a hint?</button>
+                    <div class="starter-content">
+                        <span class="starter-phrase">"I am usually shy because..."</span>
+                        <span class="starter-phrase">"I am confident. I like to talk to..."</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. VOCAB 1: OPEN THE BOX -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-box-open"></i> KEY VOCABULARY</h2>
+                <p>Click the boxes to reveal the introduction words.</p>
+                <div class="ww-grid">
+                    <div class="ww-box" onclick="window.openBox(this, 'Greeting', 'A word or sign of welcome when meeting someone.', 'You start with a greeting.')">
+                        <i class="fa-solid fa-hand-wave"></i><span style="font-family: var(--font-code); color: var(--text-dim); font-size: 1.2rem;">1</span>
+                    </div>
+                    <div class="ww-box" onclick="window.openBox(this, 'Detail', 'A small individual fact or item.', 'Add one extra detail about you.')">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i><span style="font-family: var(--font-code); color: var(--text-dim); font-size: 1.2rem;">2</span>
+                    </div>
+                    <div class="ww-box" onclick="window.openBox(this, 'Hobby', 'An activity done in your free time for pleasure.', 'Some of my hobbies are hiking and traveling.')">
+                        <i class="fa-solid fa-palette"></i><span style="font-family: var(--font-code); color: var(--text-dim); font-size: 1.2rem;">3</span>
+                    </div>
+                </div>
+                <button class="btn-start" style="margin-top: 30px; display: none;" id="btn-v1" onclick="window.nextSlide()">PROCEED</button>
+            </div>
+        </div>
+
+        <!-- 5. VIDEO CHUNK 1: THE FORMULA -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-brands fa-youtube"></i> THE FORMULA</h2>
+                <p>Watch from 0:00 to 4:00. Pay attention to the 6 steps.</p>
+                <div class="video-wrapper">
+                    <iframe data-src="https://www.youtube-nocookie.com/embed/p8MgSH-0G8c?start=0&end=240&rel=0&modestbranding=1" allowfullscreen></iframe>
+                </div>
+                <button class="btn-start" onclick="window.nextSlide()">I FINISHED WATCHING</button>
+            </div>
+        </div>
+
+        <!-- 6. GRAMMAR BUILDER -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-hammer"></i> GRAMMAR BUILDER</h2>
+                <p>Complete the sentences using the verb TO BE.</p>
+                
+                <div class="grammar-builder">
+                    <div class="g-sentence">
+                        My name <span class="g-slot" id="g-slot-1" onclick="window.activateSlot(this, 'is')">[ Select ]</span> Volka.
+                    </div>
+                    <div class="g-sentence">
+                        I <span class="g-slot" id="g-slot-2" onclick="window.activateSlot(this, 'am')">[ Select ]</span> from Canada.
+                    </div>
+                    
+                    <div class="g-options" id="g-opts">
+                        <button class="g-opt-btn" onclick="window.fillGrammarSlot('is')">is</button>
+                        <button class="g-opt-btn" onclick="window.fillGrammarSlot('am')">am</button>
+                        <button class="g-opt-btn" onclick="window.fillGrammarSlot('are')">are</button>
+                    </div>
+                </div>
+
+                <div id="grammar-rule" style="display: none; background: rgba(139, 92, 246, 0.1); border: 1px solid var(--brand-main); padding: 20px; border-radius: 15px; text-align: center; animation: popIn 0.4s forwards;">
+                    <p style="margin:0; font-size: 1.5rem;">Use <strong style="color:var(--brand-main)">I am</strong> (I'm) for yourself, and <strong style="color:var(--brand-main)">is</strong> for objects/names (My name is).</p>
+                </div>
+                <button class="btn-start" style="margin-top: 30px;" onclick="window.nextSlide()">NEXT</button>
+            </div>
+        </div>
+
+        <!-- 7. SYNTAX BUILDER -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-wrench"></i> BUILD THE SENTENCE</h2>
+                <p>Reorder the words to introduce yourself.</p>
+                <div class="drop-zone" id="dz-1"></div>
+                <div class="ww-grid" style="gap: 15px; margin-top: 0;">
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">Canada</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">I</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">a</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">student.</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">am</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">from</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">and</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">I</span>
+                    <span class="word-chip" onclick="window.moveWord(this, 'dz-1', 'I,am,from,Canada,and,I,am,a,student.')">am</span>
+                </div>
+                <div class="speaking-hub" id="hub-syn">
+                    <p><strong>TEACHER:</strong> Now ask the student: "Where are you from?"</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. VIDEO CHUNK 2: VERSIONS -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-brands fa-youtube"></i> THE 3 VERSIONS</h2>
+                <p>Watch from 4:00 to 7:47. Pay attention to the questions.</p>
+                <div class="video-wrapper">
+                    <iframe data-src="https://www.youtube-nocookie.com/embed/p8MgSH-0G8c?start=240&end=467&rel=0&modestbranding=1" allowfullscreen></iframe>
+                </div>
+                <button class="btn-start" onclick="window.nextSlide()">I FINISHED WATCHING</button>
+            </div>
+        </div>
+
+        <!-- 9. ACTION MATCH (DRAG & DROP) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-hand-pointer"></i> QUESTION MATCH</h2>
+                <p>Drag the Question to the correct Answer.</p>
+                
+                <div class="match-container">
+                    <div class="match-col" style="max-width: 300px;" id="drag-source-actions">
+                        <div class="drag-item" draggable="true" ondragstart="window.dragStart(event)" id="drag-job" data-match="student">What do you do?</div>
+                        <div class="drag-item" draggable="true" ondragstart="window.dragStart(event)" id="drag-like" data-match="movies">What do you like to do?</div>
+                        <div class="drag-item" draggable="true" ondragstart="window.dragStart(event)" id="drag-from" data-match="canada">Where are you from?</div>
+                    </div>
+                    <div class="match-col">
+                        <div class="def-row">
+                            <div class="match-dropzone" style="width: 250px;" ondragover="window.allowDrop(event)" ondrop="window.dropMatch(event, 'canada', 'hub-mem')"></div>
+                            <span class="def-text">"I'm from Canada."</span>
+                        </div>
+                        <div class="def-row">
+                            <div class="match-dropzone" style="width: 250px;" ondragover="window.allowDrop(event)" ondrop="window.dropMatch(event, 'student', 'hub-mem')"></div>
+                            <span class="def-text">"I'm a student."</span>
+                        </div>
+                        <div class="def-row">
+                            <div class="match-dropzone" style="width: 250px;" ondragover="window.allowDrop(event)" ondrop="window.dropMatch(event, 'movies', 'hub-mem')"></div>
+                            <span class="def-text">"I like to watch movies."</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="speaking-hub" id="hub-mem">
+                    <p><strong>TEACHER:</strong> Excellent! Now ask these 3 questions to the student.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. VOCAB 2: SMART DICT -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-magnifying-glass"></i> CONTEXT CHECK</h2>
+                <p>Read the text and click on the highlighted words.</p>
+                <div style="background: rgba(255,255,255,0.03); padding: 40px; border-radius: 20px; font-size: 1.8rem; text-align: left; line-height: 2; width: 100%; max-width: 800px; border: 1px solid var(--glass-border);">
+                    "If you are at work, use a <span class="hl" onclick="window.openDict('Professional')">professional</span> introduction. Try to speak so you sound <span class="hl" onclick="window.openDict('Fluent')">fluent</span>. Try not to make a <span class="hl" onclick="window.openDict('Mistake')">mistake</span>."
+                </div>
+                <button class="btn-start" style="margin-top: 30px;" onclick="window.nextSlide()">NEXT STEP</button>
+            </div>
+        </div>
+
+        <!-- 11. VIDEO CHUNK 3: MISTAKES -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-brands fa-youtube"></i> COMMON MISTAKES</h2>
+                <p>Watch from 7:47 to 10:00. What is the mistake with age?</p>
+                <div class="video-wrapper">
+                    <iframe data-src="https://www.youtube-nocookie.com/embed/p8MgSH-0G8c?start=467&end=600&rel=0&modestbranding=1" allowfullscreen></iframe>
+                </div>
+                <button class="btn-start" onclick="window.nextSlide()">I FINISHED WATCHING</button>
+            </div>
+        </div>
+
+        <!-- 12. TRUTH BOARD -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-list-check"></i> THE TRUTH BOARD</h2>
+                <p>Verify if the sentences are correct or wrong.</p>
+                <div style="width: 100%; max-width: 900px; margin-top: 20px;">
+                    <div id="tr-1" style="background: rgba(255,255,255,0.05); padding: 25px 40px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border: 1px solid var(--glass-border); transition: 0.3s;">
+                        <span style="font-size: 1.5rem; font-weight: 500;">1. "I have 25 years old."</span>
+                        <div style="display: flex; gap: 15px;">
+                            <button class="nav-btn" style="border: 2px solid var(--glass-border); border-radius: 12px; padding: 15px 25px; font-size: 1.1rem;" onclick="window.checkTruth(this, false, 'tr-1')">CORRECT</button>
+                            <button class="nav-btn" style="border: 2px solid var(--glass-border); border-radius: 12px; padding: 15px 25px; font-size: 1.1rem;" onclick="window.checkTruth(this, true, 'tr-1')">WRONG</button>
+                        </div>
+                    </div>
+                    <div id="tr-2" style="background: rgba(255,255,255,0.05); padding: 25px 40px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--glass-border); transition: 0.3s;">
+                        <span style="font-size: 1.5rem; font-weight: 500;">2. "I am from Canada."</span>
+                        <div style="display: flex; gap: 15px;">
+                            <button class="nav-btn" style="border: 2px solid var(--glass-border); border-radius: 12px; padding: 15px 25px; font-size: 1.1rem;" onclick="window.checkTruth(this, true, 'tr-2')">CORRECT</button>
+                            <button class="nav-btn" style="border: 2px solid var(--glass-border); border-radius: 12px; padding: 15px 25px; font-size: 1.1rem;" onclick="window.checkTruth(this, false, 'tr-2')">WRONG</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 13. QUICK THINKER (NAME 3) -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-bolt"></i> QUICK THINKER</h2>
+                <p>Spin the wheel. Name 3 words for that category!</p>
+                
+                <div style="height: 120px; background: rgba(0,0,0,0.5); border: 3px solid var(--brand-main); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; width: 100%; max-width: 600px; margin: 0 auto 30px;">
+                    <div id="room-display" style="font-family: var(--font-display); font-size: 2.8rem; font-weight: 900; color: var(--brand-main); transition: 0.1s;">SPIN THE WHEEL</div>
+                </div>
+                <button class="btn-start" onclick="window.spinRoom(this)">RANDOMIZE <i class="fa-solid fa-dice"></i></button>
+
+                <div id="n3-checks-container" style="display: none; gap: 30px; justify-content: center; margin-top: 40px; animation: popIn 0.5s ease;">
+                    <div class="n3-circle" onclick="window.checkN3(this)">1</div>
+                    <div class="n3-circle" onclick="window.checkN3(this)">2</div>
+                    <div class="n3-circle" onclick="window.checkN3(this)">3</div>
+                </div>
+
+                <div class="speaking-hub" id="hub-n3">
+                    <p><strong>TEACHER:</strong> Click the circles above as the student names 3 valid items!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 14. FLUENCY BOOSTER: WOULD YOU RATHER -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-code-branch"></i> WOULD YOU RATHER?</h2>
+                <p>Choose your scenario and explain why.</p>
+                <div class="wyr-container">
+                    <div class="wyr-card" onclick="window.selectWyr(this)">
+                        <i class="fa-solid fa-user"></i>
+                        <p style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; margin:0;">Introduce yourself to 1 person.</p>
+                    </div>
+                    <div class="wyr-card" onclick="window.selectWyr(this)">
+                        <i class="fa-solid fa-users"></i>
+                        <p style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 700; margin:0;">Introduce yourself to 100 people.</p>
+                    </div>
+                </div>
+                <div class="speaking-hub" id="hub-wyr">
+                    <p><strong>TEACHER:</strong> Help the student justify the answer.</p>
+                    <button class="starter-btn" onclick="this.nextElementSibling.classList.toggle('active')"><i class="fa-solid fa-lightbulb"></i> Need a hint?</button>
+                    <div class="starter-content">
+                        <span class="starter-phrase">"I prefer to introduce myself to... because it is easier/scary."</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 15. FLUENCY BOOSTER: AGREE OR DISAGREE -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-balance-scale"></i> STAND YOUR GROUND</h2>
+                <p>What is your opinion on this statement?</p>
+                <div style="background: #1e293b; padding: 50px; border-radius: 20px; font-size: 2.5rem; font-weight: 900; margin-bottom: 30px; box-shadow: inset 0 0 30px rgba(0,0,0,0.8); text-align: center; border: 1px dashed var(--glass-border);">
+                    "It is important to have a perfect accent in English."
+                </div>
+                <div class="agree-container" id="agree-box">
+                    <button class="agree-btn disagree" onclick="window.selectAgree(this)">DISAGREE</button>
+                    <button class="agree-btn neutral" onclick="window.selectAgree(this)">NEUTRAL</button>
+                    <button class="agree-btn agree" onclick="window.selectAgree(this)">AGREE</button>
+                </div>
+                <div class="speaking-hub" id="hub-agree">
+                    <p><strong>TEACHER:</strong> Challenge the student: "Why do you think that?"</p>
+                    <button class="starter-btn" onclick="this.nextElementSibling.classList.toggle('active')"><i class="fa-solid fa-lightbulb"></i> Need a hint?</button>
+                    <div class="starter-content">
+                        <span class="starter-phrase">"I agree/disagree because communication is..."</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 16. ENHANCED CONVERSATION CARDS -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-clone"></i> CONVERSATION CARDS</h2>
+                <p>Pick a card to start a deep discussion.</p>
+                <div class="topic-grid">
+                    <div class="t-card" onclick="window.flipCard(this, 'What is your favorite hobby? Why?', 'My favorite hobby is...')">
+                        <div class="t-front"></div>
+                        <div class="t-back"></div>
+                    </div>
+                    <div class="t-card" onclick="window.flipCard(this, 'Is it hard to make friends in a new city?', 'I think it is hard/easy because...')">
+                        <div class="t-front"></div>
+                        <div class="t-back"></div>
+                    </div>
+                    <div class="t-card" onclick="window.flipCard(this, 'Do you prefer learning English online or in a school?', 'I prefer learning... because...')">
+                        <div class="t-front"></div>
+                        <div class="t-back"></div>
+                    </div>
+                </div>
+                <div class="speaking-hub" id="hub-cards" style="display:none; margin-top: 30px;">
+                    <p><strong>TEACHER:</strong> Let the student express their ideas naturally.</p>
+                    <button class="starter-btn" onclick="this.nextElementSibling.classList.toggle('active')"><i class="fa-solid fa-lightbulb"></i> Need a hint?</button>
+                    <div class="starter-content">
+                        <span class="starter-phrase" id="cards-starter">"..."</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 17. ARENA: ROLEPLAY -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-users-viewfinder"></i> THE ARENA: NEW FRIEND</h2>
+                <p>Click the card to reveal your mission!</p>
+                <div style="perspective: 1000px; margin-top: 30px; width: 100%; max-width: 350px;">
+                    <div class="t-card" style="width: 100%; height: 350px;" onclick="this.classList.toggle('flipped'); document.getElementById('hub-arena').style.display='block';">
+                        <div class="t-front" style="background: rgba(0,0,0,0.5); font-size: 2rem; border-color: var(--brand-main); flex-direction: column;">
+                            <i class="fa-solid fa-handshake" style="font-size: 5rem; margin-bottom: 20px; color: var(--brand-main);"></i>
+                            <span style="font-size: 1.5rem; color: #fff;">THE STUDENT</span>
+                        </div>
+                        <div class="t-back" style="font-size: 1.3rem; padding: 30px; line-height: 1.5; color: #000; justify-content: center; background: var(--brand-main);">
+                            Your teacher is a new student in your English class. Introduce yourself and ask them 3 questions!
+                        </div>
+                    </div>
+                </div>
+                <div class="speaking-hub" id="hub-arena">
+                    <p><strong>TEACHER:</strong> Act as the new student. Answer their questions simply.</p>
+                    <button class="starter-btn" onclick="this.nextElementSibling.classList.toggle('active')"><i class="fa-solid fa-lightbulb"></i> Need a hint?</button>
+                    <div class="starter-content">
+                        <span class="starter-phrase">"Hi, I'm [Name]. I'm from [Country]. Where are you from?"</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 18. FINAL PITCH -->
+        <div class="slide">
+            <div class="glass-panel">
+                <h2><i class="fa-solid fa-bullhorn"></i> THE FINAL PITCH</h2>
+                <p>Give your professional introduction for 30 seconds.</p>
+                <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid var(--brand-main); padding: 40px; border-radius: 20px; text-align: left; width: 100%; max-width: 700px; margin-top: 20px;">
+                    <h3 style="color:#fff; margin-bottom: 20px; font-size: 1.8rem; font-family: var(--font-display);">MISSION CHECKLIST:</h3>
+                    <ul style="color: #fff; font-size: 1.5rem; margin-left: 30px; line-height: 2;">
+                        <li>Say your name and country.</li>
+                        <li>Say your job/studies.</li>
+                        <li>Mention 2 hobbies (extra details).</li>
+                        <li>End with "Nice to meet you".</li>
+                    </ul>
+                </div>
+                <button class="btn-start" style="margin-top: 40px;" onclick="window.nextSlide()">FINISH MISSION</button>
+            </div>
+        </div>
+
+        <!-- 19. MISSION COMPLETE -->
+        <div class="slide">
+            <div class="glass-panel" style="text-align: center; border: none; box-shadow: none; background: transparent;">
+                <div style="font-size: 8rem; color: var(--correct); filter: drop-shadow(0 0 30px var(--correct)); animation: popIn 0.8s ease-out; margin-bottom: 20px;"><i class="fa-solid fa-award"></i></div>
+                <h1 style="color: var(--correct); font-size: 6rem; text-shadow: 0 10px 30px rgba(0,0,0,0.5);">INTRO MASTER</h1>
+                <p style="font-size: 1.8rem; color: #a3a3a3;">Congratulations, <span class="dyn-name">Student</span>! You cleared The Perfect Intro.</p>
+                
+                <div class="ww-grid" style="gap: 30px; margin-top: 40px;">
+                    <div style="background: #1e293b; padding: 30px; border-radius: 20px; width: 250px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <i class="fa-solid fa-check-circle" style="color: var(--brand-main); font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p style="margin: 0; font-weight: 800; font-size: 1.3rem; color: #fff;">Intro Vocab</p>
+                    </div>
+                    <div style="background: #1e293b; padding: 30px; border-radius: 20px; width: 250px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <i class="fa-solid fa-check-circle" style="color: var(--brand-main); font-size: 3rem; margin-bottom: 15px;"></i>
+                        <p style="margin: 0; font-weight: 800; font-size: 1.3rem; color: #fff;">To Be Check</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <div class="progress-bar" id="p-bar"></div>
+    <div class="footer" id="main-footer">
+        <button class="nav-btn" onclick="window.prevSlide()"><i class="fa-solid fa-chevron-left"></i> BACK</button>
+        <div id="slide-num" style="font-family: var(--font-code); color: #fff; font-weight: 700; font-size: 1.3rem; letter-spacing: 2px;">1 / 19</div>
+        <button class="nav-btn next" onclick="window.nextSlide()">NEXT <i class="fa-solid fa-chevron-right" style="margin-left: 5px;"></i></button>
+    </div>
+
+    <script>
+        // Core Engine
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('p-bar');
+        const slideNum = document.getElementById('slide-num');
+
+        // Added 'speak' property for Follow-Up questions in the Smart Dict
+        const dictionary = {
+            'greeting': { p: '/ˈɡriː.tɪŋ/', d: 'A word or sign of welcome when meeting someone.', e: 'You start with a greeting.', speak: 'What is your favorite greeting in English?' },
+            'detail': { p: '/ˈdiː.teɪl/', d: 'A small individual fact or item.', e: 'Add one extra detail about you.', speak: 'Can you give me one detail about your city?' },
+            'hobby': { p: '/ˈhɑː.bi/', d: 'An activity done in your free time for pleasure.', e: 'Some of my hobbies are hiking and traveling.', speak: 'What is your favorite hobby?' },
+            'professional': { p: '/prəˈfeʃ.ən.əl/', d: 'Connected with a job that needs special training or skill.', e: 'If you are at work, use a professional introduction.', speak: 'Are you professional at work?' },
+            'fluent': { p: '/ˈfluː.ənt/', d: 'Able to speak a language easily and very well.', e: 'Try to speak so you sound fluent.', speak: 'Do you want to be fluent in English?' },
+            'mistake': { p: '/mɪˈsteɪk/', d: 'An action or judgment that is misguided or wrong.', e: 'Try not to make a mistake.', speak: 'Are you afraid of making mistakes?' }
+        };
+
+        window.saveName = () => {
+            const name = document.getElementById('s-name').value || "Student";
+            document.querySelectorAll('.dyn-name').forEach(el => el.innerText = name);
+            window.nextSlide();
+        };
+
+        window.nextSlide = () => {
+            if (currentSlide < slides.length - 1) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide++;
+                slides[currentSlide].classList.add('active');
+                updateUI();
+            }
+        };
+
+        window.prevSlide = () => {
+            if (currentSlide > 0) {
+                slides[currentSlide].classList.remove('active');
+                currentSlide--;
+                slides[currentSlide].classList.add('active');
+                updateUI();
+            }
+        };
+
+        function updateUI() {
+            progressBar.style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+            slideNum.innerText = `${currentSlide + 1} / ${slides.length}`;
+            
+            // Handle iFrame audio correctly when navigating
+            slides.forEach((s, i) => {
+                const iframe = s.querySelector('iframe');
+                if (iframe) {
+                    if (i === currentSlide) {
+                        if (!iframe.src || iframe.src === 'about:blank' || iframe.src === window.location.href) {
+                            iframe.src = iframe.getAttribute('data-src');
+                        }
+                    } else {
+                        iframe.src = '';
+                    }
+                }
+            });
+        }
+
+        window.toggleSidebar = (id) => {
+            document.getElementById(id).classList.toggle('open');
+        };
+
+        window.openDict = (word) => {
+            const lower = word.toLowerCase();
+            const data = dictionary[lower] || { p: '/???/', d: 'Select a keyword.', e: '...', speak: '...' };
+            document.getElementById('d-word').innerText = word;
+            document.getElementById('d-phonetic').innerText = data.p;
+            document.getElementById('d-def').innerText = data.d;
+            document.getElementById('d-ex').innerText = `"${data.e}"`;
+            document.getElementById('d-speak').innerText = data.speak;
+            document.getElementById('dict-panel').classList.add('open');
+        };
+
+        window.openBox = (el, word, def, ex) => {
+            el.classList.add('opened');
+            window.openDict(word);
+            document.getElementById('btn-v1').style.display = 'inline-flex';
+        };
+
+        /* GRAMMAR BUILDER (Interactive Tool) */
+        let activeGrammarSlot = null;
+        window.activateSlot = function(slot, expected) {
+            document.querySelectorAll('.g-slot').forEach(s => s.classList.remove('active-slot'));
+            slot.classList.add('active-slot');
+            activeGrammarSlot = { el: slot, ans: expected };
+            document.getElementById('g-opts').classList.add('active');
+        };
+
+        window.fillGrammarSlot = function(val) {
+            if(!activeGrammarSlot) return;
+            if(val === activeGrammarSlot.ans) {
+                activeGrammarSlot.el.innerText = val;
+                activeGrammarSlot.el.classList.remove('active-slot');
+                activeGrammarSlot.el.classList.add('filled');
+                activeGrammarSlot = null;
+                document.getElementById('g-opts').classList.remove('active');
+                
+                // Check if both are filled
+                const allFilled = Array.from(document.querySelectorAll('.g-slot')).every(s => s.classList.contains('filled'));
+                if(allFilled) {
+                    document.getElementById('grammar-rule').style.display = 'block';
+                }
+            } else {
+                activeGrammarSlot.el.style.borderColor = 'var(--incorrect)';
+                activeGrammarSlot.el.style.animation = 'shake 0.4s';
+                setTimeout(() => { 
+                    activeGrammarSlot.el.style.borderColor = 'var(--glass-border)';
+                    activeGrammarSlot.el.style.animation = '';
+                }, 400);
+            }
+        };
+
+        /* DRAG & DROP LOGIC */
+        let matchedItems = {};
+        window.dragStart = function(ev) { ev.dataTransfer.setData("text", ev.target.id); };
+        window.allowDrop = function(ev) { ev.preventDefault(); };
+        window.dropMatch = function(ev, targetMatch, hubId) {
+            ev.preventDefault();
+            let data = ev.dataTransfer.getData("text");
+            let el = document.getElementById(data);
+            
+            if (el && el.dataset.match === targetMatch) {
+                ev.target.innerHTML = '';
+                ev.target.appendChild(el);
+                ev.target.style.borderColor = 'var(--correct)';
+                ev.target.style.background = 'rgba(16, 185, 129, 0.1)';
+                
+                el.classList.add('matched');
+                el.setAttribute('draggable', false);
+
+                if(!matchedItems[hubId]) matchedItems[hubId] = 0;
+                matchedItems[hubId]++;
+                
+                const threshold = 3; 
+                if(matchedItems[hubId] >= threshold) {
+                    document.getElementById(hubId).style.display = 'block';
+                }
+            } else {
+                ev.target.style.borderColor = 'var(--incorrect)';
+                ev.target.style.animation = 'shake 0.4s';
+                setTimeout(() => { ev.target.style.borderColor = '#475569'; ev.target.style.animation = ''; }, 400);
+            }
+        };
+
+        /* TEACHER HUD FEATURES */
+        let hudTimerInt;
+        let hudTime = 60;
+        window.startTimer = function() {
+            clearInterval(hudTimerInt);
+            hudTime = 60;
+            const tEl = document.getElementById('hud-timer');
+            tEl.innerText = "00:60";
+            tEl.style.color = "var(--brand-main)";
+            
+            hudTimerInt = setInterval(() => {
+                hudTime--;
+                tEl.innerText = `00:${hudTime < 10 ? '0'+hudTime : hudTime}`;
+                if(hudTime <= 10) tEl.style.color = "var(--incorrect)";
+                if(hudTime <= 0) clearInterval(hudTimerInt);
+            }, 1000);
+        };
+
+        window.toggleCorrectionMode = function() {
+            document.body.classList.toggle('correction-mode');
+        };
+
+        window.showAlert = function(msg, type) {
+            const overlay = document.getElementById('alert-screen');
+            const textEl = document.getElementById('alert-msg');
+            textEl.innerHTML = msg;
+            textEl.className = 'alert-text alert-' + type;
+            overlay.classList.add('show');
+            setTimeout(() => { overlay.classList.remove('show'); }, 2500);
+        };
+
+        let starCount = 0;
+        window.awardStar = function() {
+            starCount++;
+            document.getElementById('hud-stars').innerText = '⭐ ' + starCount;
+            showAlert('⭐<br>+1 POINT!', 'star');
+        };
+
+        /* SYNTAX BUILDER */
+        window.moveWord = (el, dzId, targetStr) => {
+            const dz = document.getElementById(dzId);
+            const target = targetStr.split(',');
+            
+            const clone = el.cloneNode(true);
+            clone.onclick = null;
+            clone.style.background = 'var(--brand-main)';
+            clone.style.color = '#fff';
+            dz.appendChild(clone);
+            el.style.opacity = '0.3';
+            el.style.pointerEvents = 'none';
+
+            if(dz.children.length === target.length) {
+                const result = Array.from(dz.children).map(c => c.innerText.replace('.', '')).join(',');
+                const normalizedTarget = target.map(t => t.replace('.', '')).join(',');
+                
+                if(result === normalizedTarget) {
+                    dz.style.borderColor = 'var(--correct)';
+                    dz.style.background = 'rgba(16, 185, 129, 0.1)';
+                    document.getElementById('hub-syn').style.display = 'block';
+                } else {
+                    dz.style.borderColor = 'var(--incorrect)';
+                    setTimeout(() => {
+                        dz.innerHTML = '';
+                        dz.style.borderColor = 'rgba(255,255,255,0.2)';
+                        dz.style.background = 'rgba(0,0,0,0.2)';
+                        document.querySelectorAll('.word-chip').forEach(c => { c.style.opacity = '1'; c.style.pointerEvents = 'auto'; });
+                    }, 1000);
+                }
+            }
+        };
+
+        /* TRUTH BOARD */
+        window.checkTruth = (btn, correct, rowId) => {
+            const row = document.getElementById(rowId);
+            if(correct) {
+                btn.style.background = 'var(--correct)';
+                btn.style.color = '#000';
+                btn.style.borderColor = 'var(--correct)';
+                row.style.borderColor = 'var(--correct)';
+            } else {
+                btn.style.background = 'var(--incorrect)';
+                setTimeout(() => { btn.style.background = ''; btn.style.borderColor = 'var(--glass-border)'; }, 500);
+            }
+        };
+
+        /* WOULD YOU RATHER */
+        window.selectWyr = (el) => {
+            document.querySelectorAll('.wyr-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('hub-wyr').style.display = 'block';
+        };
+
+        /* STAND YOUR GROUND */
+        window.selectAgree = (el) => {
+            document.querySelectorAll('.agree-btn').forEach(b => b.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('hub-agree').style.display = 'block';
+        };
+
+        /* QUICK THINKER (NAME 3) */
+        window.spinRoom = function(btn) {
+            const categories = ["JOBS", "HOBBIES", "GREETINGS", "COUNTRIES", "LANGUAGES"];
+            const display = document.getElementById('room-display');
+            let count = 0;
+            btn.style.display = 'none';
+            display.style.color = "#fff";
+
+            const interval = setInterval(() => {
+                display.innerText = categories[Math.floor(Math.random() * categories.length)];
+                count++;
+                if(count > 15) {
+                    clearInterval(interval);
+                    display.style.color = "var(--brand-main)";
+                    document.getElementById('n3-checks-container').style.display = 'flex';
+                    document.getElementById('hub-n3').style.display = 'block';
+                }
+            }, 80);
+        }
+
+        window.checkN3 = (el) => {
+            if(el.classList.contains('filled')) return;
+            el.classList.add('filled');
+            el.innerHTML = '<i class="fa-solid fa-check"></i>';
+        };
+
+        /* CONVERSATION CARDS */
+        window.flipCard = (el, text, starter) => {
+            if(el.classList.contains('flipped')) return;
+            el.classList.add('flipped');
+            el.querySelector('.t-back').innerText = text;
+            
+            document.getElementById('hub-cards').style.display = 'block';
+            document.getElementById('cards-starter').innerText = `"${starter}"`;
+        };
+
+        window.toggleFocusMode = () => {
+            const footer = document.getElementById('main-footer');
+            const pBar = document.getElementById('p-bar');
+            if(footer.style.display === 'none') {
+                footer.style.display = 'flex';
+                pBar.style.display = 'block';
+            } else {
+                footer.style.display = 'none';
+                pBar.style.display = 'none';
+            }
+        }
+
+        window.showHub = (id) => {
+            const hub = document.getElementById(id);
+            if (hub) {
+                hub.style.display = 'block';
+            }
+        }
+
+        window.toggleFullscreen = () => {
+            const doc = window.document;
+            const docEl = doc.documentElement;
+
+            const requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+            const cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+            if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+                if (requestFullScreen) {
+                    try {
+                        const promise = requestFullScreen.call(docEl);
+                        if (promise) promise.catch(err => console.warn(err));
+                    } catch (e) {
+                        requestFullScreen.call(docEl);
+                    }
+                }
+            } else {
+                if (cancelFullScreen) cancelFullScreen.call(doc);
+            }
+        };
+
+        window.onload = () => {
+            updateUI();
+        };
+    </script>
+</body>
+</html>
